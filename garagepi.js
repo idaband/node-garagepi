@@ -7,6 +7,7 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var startTakingSnaps = false;
+var isOpen = false;
 
 require('console-stamp')(console, '[HH:MM:ss]');
 
@@ -26,6 +27,7 @@ app.get('/', function(req, res) {
 app.get('/api/clickbutton', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({ status: 'done' }));
+if(!isOpen)
   outputSequence(7, '10', 1000);
 });
 
@@ -38,9 +40,10 @@ function gpioWrite(gpio, pin, seq, timeout) {
   if (!seq || seq.length <= 0) { 
     console.log('closing pin:', pin);
     gpio.unexport();
+isOpen =false;
     return;
   }
-
+isOpen = true;
   var value = seq.substr(0, 1);
   seq = seq.substr(1);
   setTimeout(function() {
